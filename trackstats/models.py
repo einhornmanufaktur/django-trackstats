@@ -73,17 +73,17 @@ class Domain(models.Model):
         return self.name or self.ref
 
     def natural_key(self):
-        return [self.ref]
+        return (self.ref,)
 
 
 class MetricManager(RegisterLazilyManagerMixin, models.Manager):
     def register(self, domain, ref, name="", description=""):
         return super(MetricManager, self)._register(
-            defaults={"name": name, "description": description}, domain=domain, ref=ref
+            defaults={"name": name, "description": description}, ref=ref, domain=domain
         )
 
     def get_by_natural_key(self, domain, ref):
-        return self.get(domain=domain, ref=ref)
+        return self.get(ref=ref, domain=domain)
 
 
 class Metric(models.Model):
@@ -100,13 +100,15 @@ class Metric(models.Model):
     description = models.TextField(blank=True, help_text="Description")
 
     class Meta:
-        unique_together = ("domain", "ref")
+        unique_together = (("domain", "ref"),)
 
     def __str__(self):
         return self.name or self.ref
 
     def natural_key(self):
-        return [self.domain, self.ref]
+        return self.domain.natural_key() + (self.ref,)
+
+    natural_key.dependencies = ["trackstats.domain"]
 
 
 class AbstractStatisticQuerySet(models.QuerySet):
