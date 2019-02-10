@@ -83,7 +83,7 @@ class MetricManager(RegisterLazilyManagerMixin, models.Manager):
         )
 
     def get_by_natural_key(self, domain, ref):
-        return self.get(ref=ref, domain=domain)
+        return self.get(ref=ref, domain__ref=domain)
 
 
 class Metric(models.Model):
